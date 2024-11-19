@@ -64,7 +64,10 @@ impl Violation for AirflowDagNoScheduleArgument {
 /// AIR301
 pub(crate) fn dag_no_schedule_argument(checker: &mut Checker, expr: &Expr) {
     // Don't check non-call expressions.
-    let Expr::Call(ast::ExprCall { arguments, .. }) = expr else {
+    let Expr::Call(ast::ExprCall {
+        func, arguments, ..
+    }) = expr
+    else {
         return;
     };
 
@@ -72,7 +75,7 @@ pub(crate) fn dag_no_schedule_argument(checker: &mut Checker, expr: &Expr) {
     // function) from Airflow.
     if !checker
         .semantic()
-        .resolve_qualified_name(expr)
+        .resolve_qualified_name(func)
         .is_some_and(|qualname| matches!(qualname.segments(), ["airflow", .., "DAG" | "dag"]))
     {
         return;
